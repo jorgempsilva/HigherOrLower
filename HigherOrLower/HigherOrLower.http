@@ -1,0 +1,6 @@
+@HigherOrLower_HostAddress = http://localhost:5081
+
+GET {{HigherOrLower_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
