@@ -1,10 +1,16 @@
 using Domain.Interfaces;
 using Domain.Services;
+using Infrastructure.Contexts;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IGameRepository, GameRepository>();
+builder.Services.AddDbContext<SqlContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddTransient<GameService>();
 
 builder.Services.AddControllers();
