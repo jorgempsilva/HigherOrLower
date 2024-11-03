@@ -1,6 +1,8 @@
 ﻿using Domain.Entities;
 using Infrastructure.Mappings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Contexts
 {
@@ -18,6 +20,23 @@ namespace Infrastructure.Contexts
             CardMap.Map(modelBuilder);
             PlayerMap.Map(modelBuilder);
             GameMap.Map(modelBuilder);
+        }
+    }
+
+    public class SqlContextFactory : IDesignTimeDbContextFactory<SqlContext>
+    {
+        public SqlContext CreateDbContext(string[] args = null)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<SqlContext>();
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
+
+            return new SqlContext(optionsBuilder.Options);
         }
     }
 }

@@ -12,19 +12,30 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["HigherOrLower/HigherOrLower.csproj", "HigherOrLower/"]
-RUN dotnet restore "./HigherOrLower/HigherOrLower.csproj"
+#COPY ["HigherOrLower/HigherOrLower.csproj", "HigherOrLower/"]
+COPY HigherOrLower/HigherOrLower.csproj /app/HigherOrLower/
+COPY Domain/Domain.csproj /app/Domain/
+COPY Infrastructure/Infrastructure.csproj /app/Infrastructure/
+COPY HigherOrLower /app/HigherOrLower
+COPY Domain /app/Domain
+COPY Infrastructure /app/Infrastructure
+WORKDIR /app
+RUN dotnet restore HigherOrLower/HigherOrLower.csproj
 COPY . .
-WORKDIR "/src/HigherOrLower"
-RUN dotnet build "./HigherOrLower.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "HigherOrLower/HigherOrLower.csproj" -c $BUILD_CONFIGURATION -o /app/output
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./HigherOrLower.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "HigherOrLower/HigherOrLower.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "HigherOrLower.dll"]
+COPY Scripts/apply-migrations.sh /app/Scripts/
+COPY HigherOrLower /app/HigherOrLower
+COPY Infrastructure /app/Infrastructure
+COPY Domain /app/Domain
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
