@@ -10,7 +10,11 @@ namespace Domain.Services
         public Game CreateGame(string nome1, string nome2)
         {
             var game = new Game();
+            var player1 = new Player(nome1);
+            var player2 = new Player(nome2);
+            _gameRepository.AddPlayer(player1);
             game.AddPlayer(nome1);
+            _gameRepository.AddPlayer(player2);
             game.AddPlayer(nome2);
             _gameRepository.AddGame(game);
             return game;

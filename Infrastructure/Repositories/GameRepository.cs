@@ -1,30 +1,38 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Contexts;
 
 namespace Infrastructure.Repositories
 {
     public class GameRepository : IGameRepository
     {
-        private readonly Dictionary<Guid, Game> _games = [];
+        private readonly SqlContext _context;
+
+        public GameRepository(SqlContext context)
+        {
+            _context = context;
+        }
 
         public Game GetGameById(Guid gameId)
         {
-            _games.TryGetValue(gameId, out var game);
-            return game;
+            return _context.Games.FirstOrDefault(x => x.Id == gameId);
         }
 
         public void AddGame(Game game)
         {
-            _games.Add(game.Id, game);
+            _context.Games.Add(game);
+            _context.SaveChanges();
+        }
+
+        public void AddPlayer(Player player)
+        {
+            _context.Players.Add(player);
+            _context.SaveChanges();
         }
 
         IEnumerable<Game> IGameRepository.GetAllGames()
         {
-            var games = new List<Game>();
-            foreach (var game in _games)
-                games.Add(game.Value);
-
-            return games;
+            return [.. _context.Games];
         }
     }
 }
