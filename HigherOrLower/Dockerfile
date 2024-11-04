@@ -12,13 +12,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-#COPY ["HigherOrLower/HigherOrLower.csproj", "HigherOrLower/"]
+
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
 COPY HigherOrLower/HigherOrLower.csproj /app/HigherOrLower/
 COPY Domain/Domain.csproj /app/Domain/
 COPY Infrastructure/Infrastructure.csproj /app/Infrastructure/
 COPY HigherOrLower /app/HigherOrLower
 COPY Domain /app/Domain
 COPY Infrastructure /app/Infrastructure
+
 WORKDIR /app
 RUN dotnet restore HigherOrLower/HigherOrLower.csproj
 COPY . .
@@ -33,9 +37,4 @@ RUN dotnet publish "HigherOrLower/HigherOrLower.csproj" -c $BUILD_CONFIGURATION 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY Scripts/apply-migrations.sh /app/Scripts/
-COPY HigherOrLower /app/HigherOrLower
-COPY Infrastructure /app/Infrastructure
-COPY Domain /app/Domain
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="${PATH}:/root/.dotnet/tools"
+ENTRYPOINT ["dotnet", "HigherOrLower.dll"]
