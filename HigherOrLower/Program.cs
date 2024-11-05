@@ -1,5 +1,9 @@
+using Domain.Dto;
 using Domain.Interfaces;
 using Domain.Services;
+using Domain.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure.Contexts;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<SqlContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddScoped<IValidator<CreateGameDto>, CreateGameDtoValidator>();
 
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddTransient<GameService>();
