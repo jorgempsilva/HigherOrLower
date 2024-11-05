@@ -1,4 +1,5 @@
-﻿using Domain.Services;
+﻿using Domain.Dto;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HigherOrLower.Controllers
@@ -9,29 +10,22 @@ namespace HigherOrLower.Controllers
     {
         private readonly GameService _gameService = gameService;
 
-        [HttpPost("new")]
-        public async Task<IActionResult> CreateGame(List<string> players)
+        [HttpPost("newGame")]
+        public async Task<IActionResult> CreateGame([FromBody] CreateGameDto createGameDto)
         {
-            var game = await _gameService.CreateGame(players);
+            var game = await _gameService.CreateGame(createGameDto);
             return CreatedAtAction(nameof(GetGame), new { game.Id }, game);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGame(Guid id)
         {
-            try
-            {
-                var game = await _gameService.GetGameById(id);
+            var game = await _gameService.GetGameById(id);
 
-                if (game == null)
-                    return NotFound("Game not found.");
+            if (game == null)
+                return NotFound("Game not found.");
 
-                return Ok(new { GameId = id, game.CurrentCard, Players = game.Players.Select(p => new { p.Name, p.Score }) });
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(new { GameId = id, game.CurrentCard, Players = game.Players.Select(p => new { p.Name, p.Score }) });
         }
 
         [HttpPost("{gameId}/guess/{playerId}")]
@@ -66,7 +60,8 @@ namespace HigherOrLower.Controllers
             try
             {
                 var finalScore = await _gameService.GetFinalScore(gameId);
-                return Ok(new {
+                return Ok(new
+                {
                     Player1 = finalScore.ElementAt(0).Name,
                     FinalScore1 = finalScore.ElementAt(0).Score,
                     Player2 = finalScore.ElementAt(1).Name,

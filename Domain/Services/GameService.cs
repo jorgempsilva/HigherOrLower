@@ -8,9 +8,9 @@ namespace Domain.Services
     {
         private readonly IGameRepository _gameRepository = gameRepository;
 
-        public async Task<GameDto> CreateGame(List<string> players)
+        public async Task<GameDto> CreateGame(CreateGameDto createGameDto)
         {
-            return await _gameRepository.AddGameAsync(players);
+            return await _gameRepository.AddGameAsync(createGameDto.Players);
         }
 
         public async Task<Game> GetGameById(Guid gameId)
