@@ -11,9 +11,9 @@ namespace HigherOrLower.Controllers
         private static readonly Dictionary<Guid, GameService> Games = new();
 
         [HttpPost("new")]
-        public IActionResult CreateGame(string nome1, string nome2)
+        public async Task<IActionResult> CreateGame(string nome1, string nome2)
         {
-            var game = _gameService.CreateGame(nome1, nome2);
+            var game = await _gameService.CreateGame(nome1, nome2);
             return CreatedAtAction(nameof(GetGame), new { game.Id }, game);
         }
 

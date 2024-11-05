@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.Dto;
+using Domain.Entities;
 using Domain.Interfaces;
 
 namespace Domain.Services
@@ -7,17 +8,9 @@ namespace Domain.Services
     {
         private readonly IGameRepository _gameRepository = gameRepository;
 
-        public Game CreateGame(string nome1, string nome2)
+        public async Task<GameDto> CreateGame(string nome1, string nome2)
         {
-            var game = new Game();
-            var player1 = new Player(nome1);
-            var player2 = new Player(nome2);
-            _gameRepository.AddPlayer(player1);
-            game.AddPlayer(nome1);
-            _gameRepository.AddPlayer(player2);
-            game.AddPlayer(nome2);
-            _gameRepository.AddGame(game);
-            return game;
+            return await _gameRepository.AddGameAsync([nome1, nome2]);
         }
 
         public Game GetGameById(Guid gameId)
