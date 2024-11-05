@@ -8,21 +8,20 @@ namespace HigherOrLower.Controllers
     public class GameController(GameService gameService) : ControllerBase
     {
         private readonly GameService _gameService = gameService;
-        private static readonly Dictionary<Guid, GameService> Games = new();
 
         [HttpPost("new")]
-        public async Task<IActionResult> CreateGame(string nome1, string nome2)
+        public async Task<IActionResult> CreateGame(List<string> players)
         {
-            var game = await _gameService.CreateGame(nome1, nome2);
+            var game = await _gameService.CreateGame(players);
             return CreatedAtAction(nameof(GetGame), new { game.Id }, game);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetGame(Guid id)
+        public async Task<IActionResult> GetGame(Guid id)
         {
             try
             {
-                var game = _gameService.GetGameById(id);
+                var game = await _gameService.GetGameById(id);
 
                 if (game == null)
                     return NotFound("Game not found.");
@@ -36,11 +35,11 @@ namespace HigherOrLower.Controllers
         }
 
         [HttpPost("{gameId}/guess/{playerId}")]
-        public IActionResult MakeGuess(Guid gameId, Guid playerId, [FromBody] bool guessHigher)
+        public async Task<IActionResult> MakeGuess(Guid gameId, Guid playerId, [FromBody] bool guessHigher)
         {
             try
             {
-                var (IsCorrect, CurrentCard, GameOver) = _gameService.MakeGuess(gameId, playerId, guessHigher);
+                var (IsCorrect, CurrentCard, GameOver) = await _gameService.MakeGuess(gameId, playerId, guessHigher);
                 return Ok(new
                 {
                     Correct = IsCorrect,
@@ -55,18 +54,18 @@ namespace HigherOrLower.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllGames()
+        public async Task<IActionResult> GetAllGames()
         {
-            var games = _gameService.GetAllGames();
+            var games = await _gameService.GetAllGames();
             return Ok(games);
         }
 
         [HttpGet("{gameId}/score")]
-        public IActionResult GetScore(Guid gameId)
+        public async Task<IActionResult> GetScore(Guid gameId)
         {
             try
             {
-                var finalScore = _gameService.GetFinalScore(gameId);
+                var finalScore = await _gameService.GetFinalScore(gameId);
                 return Ok(new {
                     Player1 = finalScore.ElementAt(0).Name,
                     FinalScore1 = finalScore.ElementAt(0).Score,
