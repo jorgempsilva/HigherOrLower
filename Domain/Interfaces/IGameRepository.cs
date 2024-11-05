@@ -1,10 +1,11 @@
-﻿using Domain.Entities;
+﻿using Domain.Dto;
+using Domain.Entities;
 
 namespace Domain.Interfaces
 {
     public interface IGameRepository
     {
-        void AddGame(Game game);
+        Task<GameDto> AddGameAsync(List<string> playerNames);
         void AddPlayer(Player player);
         Game GetGameById(Guid gameId);
         IEnumerable<Game> GetAllGames();

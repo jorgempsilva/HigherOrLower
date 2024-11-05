@@ -15,7 +15,10 @@ namespace Infrastructure.Mappings
 
                 entity.Property(p => p.Score).IsRequired();
 
+                entity.Property(p => p.GameId).IsRequired();
+
                 entity.HasIndex(p => p.Name);
+                entity.HasIndex(p => p.GameId);
             });
         }
     }

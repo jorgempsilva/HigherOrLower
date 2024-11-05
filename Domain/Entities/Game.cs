@@ -79,7 +79,12 @@
 
         public void AddPlayer(string name)
         {
-            Players.Add(new Player(name));
+            var player = new Player(name)
+            {
+                GameId = this.Id,
+                Game = this
+            };
+            Players.Add(player);
         }
     }
 }

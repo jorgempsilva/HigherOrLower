@@ -11,13 +11,11 @@ namespace Infrastructure.Mappings
             {
                 entity.HasKey(g => g.Id);
 
-                //entity.Property(g => g.IsGameOver);
-
                 entity.Property(g => g.CurrentCard).IsRequired();
 
                 entity.HasMany(g => g.Players)
                     .WithOne(p => p.Game)
-                    .HasForeignKey(x => x.Id)
+                    .HasForeignKey(x => x.GameId)
                     .IsRequired();
             });
         }
