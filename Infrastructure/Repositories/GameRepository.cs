@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
@@ -9,9 +10,9 @@ namespace Infrastructure.Repositories
     {
         private readonly SqlContext _context = context;
 
-        public Game GetGameById(Guid gameId)
+        public async Task<Game> GetGameById(Guid gameId)
         {
-            return _context.Games.FirstOrDefault(x => x.Id == gameId);
+            return await _context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
         }
 
         public async Task<GameDto> AddGameAsync(List<string> playerNames)
@@ -61,9 +62,6 @@ namespace Infrastructure.Repositories
             _context.SaveChanges();
         }
 
-        IEnumerable<Game> IGameRepository.GetAllGames()
-        {
-            return [.. _context.Games];
-        }
+        public async Task<IEnumerable<Game>> GetAllGames() => await _context.Games.ToListAsync();
     }
 }

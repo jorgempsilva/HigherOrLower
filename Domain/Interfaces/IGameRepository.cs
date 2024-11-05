@@ -7,7 +7,7 @@ namespace Domain.Interfaces
     {
         Task<GameDto> AddGameAsync(List<string> playerNames);
         void AddPlayer(Player player);
-        Game GetGameById(Guid gameId);
-        IEnumerable<Game> GetAllGames();
+        Task<Game> GetGameById(Guid gameId);
+        Task<IEnumerable<Game>> GetAllGames();
     }
 }

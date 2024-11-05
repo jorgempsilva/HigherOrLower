@@ -8,19 +8,19 @@ namespace Domain.Services
     {
         private readonly IGameRepository _gameRepository = gameRepository;
 
-        public async Task<GameDto> CreateGame(string nome1, string nome2)
+        public async Task<GameDto> CreateGame(List<string> players)
         {
-            return await _gameRepository.AddGameAsync([nome1, nome2]);
+            return await _gameRepository.AddGameAsync(players);
         }
 
-        public Game GetGameById(Guid gameId)
+        public async Task<Game> GetGameById(Guid gameId)
         {
-            return _gameRepository.GetGameById(gameId);
+            return await _gameRepository.GetGameById(gameId);
         }
 
-        public (bool IsCorrect, string CurrentCard, bool GameOver) MakeGuess(Guid gameId, Guid playerId, bool guessHigher)
+        public async Task<(bool IsCorrect, string CurrentCard, bool GameOver)> MakeGuess(Guid gameId, Guid playerId, bool guessHigher)
         {
-            var game = _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
+            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
 
             if (game.IsGameOver) throw new Exception("Game is over.");
 
@@ -29,15 +29,15 @@ namespace Domain.Services
             return (isCorrect, game.CurrentCard, game.IsGameOver);
         }
 
-        public IEnumerable<Game> GetAllGames()
+        public async Task<IEnumerable<Game>> GetAllGames()
         {
-            var games = _gameRepository.GetAllGames();
+            var games = await _gameRepository.GetAllGames();
             return games;
         }
 
-        public List<Player> GetFinalScore(Guid gameId)
+        public async Task<List<Player>> GetFinalScore(Guid gameId)
         {
-            var game = _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
+            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
             
             if (!game.IsGameOver) throw new Exception("Game is not yet over.");
 
