@@ -1,80 +1,56 @@
-﻿namespace Domain.Entities
+﻿using Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Entities
 {
     public class Game
     {
-        private readonly List<string> _deck;
-        private int _currentCardIndex;
         public Guid Id { get; private set; }
-        public string CurrentCard { get; private set; }
-        public List<Player> Players { get; private set; } = [];
-        public bool IsGameOver => _currentCardIndex >= _deck.Count - 1;
+        public int CurrentPlayerIndex { get; set; }
+        [NotMapped]
+        public List<Card> Deck { get; set; } = [];
+        [NotMapped]
+        public Card CurrentCard { get; set; }
+        public List<Player> Players { get; set; } = [];
+        public bool IsGameOver => CurrentPlayerIndex >= Deck.Count - 1;
 
         public Game()
         {
-            _deck = GenerateShuffledDeck();
-            _currentCardIndex = 0;
-            Id = Guid.NewGuid();
-            CurrentCard = _deck[_currentCardIndex];
-        }
-
-        public bool MakeGuess(Guid gameId, Guid playerId, bool guessHigher)
-        {
-            if (IsGameOver)
-                throw new InvalidOperationException("The game is already over.");
-
-            var previousCard = CurrentCard;
-            _currentCardIndex++;
-            CurrentCard = _deck[_currentCardIndex];
-
-            var isCorrect = CompareCards(previousCard, CurrentCard, guessHigher);
-            if (isCorrect)
+            if (Deck.Count == 0)
             {
-                var player = Players.Where(p => p.Id == playerId).FirstOrDefault() ?? throw new InvalidOperationException("The player doesn't exist.");
-                player.IncrementScore();
+                Deck = GenerateShuffledDeck();
+                CurrentCard = Deck[0];
             }
-
-            return isCorrect;
+            CurrentPlayerIndex = 0;
+            Id = Guid.NewGuid();
         }
 
-        private static bool CompareCards(string previousCard, string nextCard, bool guessHigher)
-        {
-            var prevValue = GetCardValue(previousCard);
-            var nextValue = GetCardValue(nextCard);
+        public Player GetCurrentPlayer() => Players[CurrentPlayerIndex];
 
-            return guessHigher ? nextValue >= prevValue : nextValue <= prevValue;
+        public void NextPlayer()
+        {
+            CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
         }
 
-        private static int GetCardValue(string card)
+        private List<Card> GenerateShuffledDeck()
         {
-            var value = card[..^1];
-            return value switch
+            foreach (CardSuit suit in Enum.GetValues(typeof(CardSuit)))
             {
-                "A" => 1,
-                "J" => 11,
-                "Q" => 12,
-                "K" => 13,
-                _ => Convert.ToInt32(value)
-            };
-        }
-
-        private static List<string> GenerateShuffledDeck()
-        {
-            var deck = new List<string>
-            {
-                "AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
-                "AH", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
-                "AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
-                "AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"
-            };
+                foreach (CardValue value in Enum.GetValues(typeof(CardValue)))
+                {
+                    var card = new Card(value, suit);
+                    Deck.Add(card);
+                }
+            }
 
             var random = new Random();
-            for (var i = deck.Count - 1; i > 0; i--)
+            for (var i = Deck.Count - 1; i > 0; i--)
             {
                 var j = random.Next(i + 1);
-                (deck[i], deck[j]) = (deck[j], deck[i]);
+                (Deck[i], Deck[j]) = (Deck[j], Deck[i]);
             }
 
-            return deck;
+            return Deck;
         }
 
         public void AddPlayer(string name)

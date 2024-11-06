@@ -18,15 +18,16 @@ namespace Domain.Services
             return await _gameRepository.GetGameById(gameId);
         }
 
-        public async Task<(bool IsCorrect, string CurrentCard, bool GameOver)> MakeGuess(Guid gameId, Guid playerId, bool guessHigher)
+        public async Task<GameDto> ProcessGuess(Guid gameId, bool guess)
         {
-            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
+            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found");
 
-            if (game.IsGameOver) throw new Exception("Game is over.");
+            if (game.Deck.Count < 2)
+                throw new Exception("No more cards in the deck to continue.");
 
-            bool isCorrect = game.MakeGuess(game.Id, playerId, guessHigher);
+            var nextCard = game.Deck[1];
 
-            return (isCorrect, game.CurrentCard, game.IsGameOver);
+            return await _gameRepository.MakeGuess(guess, game, nextCard);
         }
 
         public async Task<IEnumerable<Game>> GetAllGames()

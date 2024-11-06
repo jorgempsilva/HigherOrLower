@@ -11,7 +11,7 @@ namespace Infrastructure.Mappings
             {
                 entity.HasKey(g => g.Id);
 
-                entity.Property(g => g.CurrentCard).IsRequired();
+                entity.Property(g => g.CurrentPlayerIndex).IsRequired();
 
                 entity.HasMany(g => g.Players)
                     .WithOne(p => p.Game)

@@ -22,32 +22,14 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Card", b =>
-                {
-                    b.Property<int>("Suit")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("Suit", "Value");
-
-                    b.HasIndex("Suit");
-
-                    b.HasIndex("Value");
-
-                    b.ToTable("Cards");
-                });
-
             modelBuilder.Entity("Domain.Entities.Game", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CurrentCard")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CurrentPlayerIndex")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -62,6 +44,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsTurn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

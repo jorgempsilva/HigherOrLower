@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Game> GetGameById(Guid gameId)
         {
-            return await _context.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+            return await _context.Games.Include(g => g.Players).FirstOrDefaultAsync(x => x.Id == gameId);
         }
 
         public async Task<GameDto> AddGameAsync(List<string> playerNames)
@@ -37,7 +37,7 @@ namespace Infrastructure.Repositories
 
                 var gameDto = new GameDto
                 {
-                    Id = game.Id,
+                    GameId = game.Id,
                     CurrentCard = game.CurrentCard,
                     Players = game.Players.Select(p => new PlayerDto
                     {
@@ -56,12 +56,37 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public void AddPlayer(Player player)
+        public async Task<GameDto> MakeGuess(bool guess, Game game, Card nextCard)
         {
-            _context.Players.Add(player);
-            _context.SaveChanges();
+            var isCorrectGuess =
+                            (guess == true && nextCard.Value >= game.CurrentCard.Value) ||
+                            (guess == false && nextCard.Value <= game.CurrentCard.Value);
+
+            if (isCorrectGuess)
+                game.Players[game.CurrentPlayerIndex].Score += 1;
+
+            game.Deck.RemoveAt(0);
+            game.CurrentCard = nextCard;
+
+            game.CurrentPlayerIndex = (game.CurrentPlayerIndex + 1) % game.Players.Count;
+            game.Players.ForEach(p => p.IsTurn = false);
+            game.Players[game.CurrentPlayerIndex].IsTurn = true;
+
+            await _context.SaveChangesAsync();
+
+            return new GameDto
+            {
+                GameId = game.Id,
+                CurrentCard = game.CurrentCard,
+                Players = game.Players.Select(p => new PlayerDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Score = p.Score
+                }).ToList()
+            };
         }
 
-        public async Task<IEnumerable<Game>> GetAllGames() => await _context.Games.ToListAsync();
+        public async Task<IEnumerable<Game>> GetAllGames() => await _context.Games.Include(g => g.Players).ToListAsync();
     }
 }
