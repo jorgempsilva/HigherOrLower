@@ -11,13 +11,17 @@ namespace HigherOrLower.Controllers
         private readonly GameService _gameService = gameService;
 
         [HttpPost("newGame")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateGame([FromBody] CreateGameDto createGameDto)
         {
             var game = await _gameService.CreateGame(createGameDto);
-            return CreatedAtAction(nameof(GetGame), new { game.Id }, game);
+            return CreatedAtAction(nameof(GetGame), new { id = game.GameId }, game);
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetGame(Guid id)
         {
             var game = await _gameService.GetGameById(id);
@@ -25,35 +29,33 @@ namespace HigherOrLower.Controllers
             if (game == null)
                 return NotFound("Game not found.");
 
-            return Ok(new { GameId = id, game.CurrentCard, Players = game.Players.Select(p => new { p.Name, p.Score }) });
+            return Ok(new { GameId = id, Card = game.CurrentCard.Value.ToString() + game.CurrentCard.Suit.ToString(),
+                Players = game.Players.Select(x => x.Name ).ToList() });
         }
 
-        [HttpPost("{gameId}/guess/{playerId}")]
-        public async Task<IActionResult> MakeGuess(Guid gameId, Guid playerId, [FromBody] bool guessHigher)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPost("{gameId}/guess")]
+        public async Task<IActionResult> Guess(Guid gameId, [FromQuery] bool guessHigher)
         {
-            try
-            {
-                var (IsCorrect, CurrentCard, GameOver) = await _gameService.MakeGuess(gameId, playerId, guessHigher);
-                return Ok(new
-                {
-                    Correct = IsCorrect,
-                    CurrentCard,
-                    GameOver
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _gameService.ProcessGuess(gameId, guessHigher);
+
+            if (result == null)
+                return NotFound("Game not found or finished.");
+
+            return Ok(result);
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllGames()
         {
             var games = await _gameService.GetAllGames();
             return Ok(games);
         }
 
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet("{gameId}/score")]
         public async Task<IActionResult> GetScore(Guid gameId)
         {

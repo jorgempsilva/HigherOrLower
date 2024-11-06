@@ -10,14 +10,12 @@ namespace Infrastructure.Contexts
     {
         public DbSet<Game> Games { get; set; }
         public DbSet<Player> Players { get; set; }
-        public DbSet<Card> Cards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>().Ignore(g => g.IsGameOver);
             base.OnModelCreating(modelBuilder);
 
-            CardMap.Map(modelBuilder);
             PlayerMap.Map(modelBuilder);
             GameMap.Map(modelBuilder);
         }

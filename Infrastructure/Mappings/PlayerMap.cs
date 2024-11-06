@@ -17,6 +17,8 @@ namespace Infrastructure.Mappings
 
                 entity.Property(p => p.GameId).IsRequired();
 
+                entity.Property(p => p.IsTurn).IsRequired();
+
                 entity.HasIndex(p => p.Name);
                 entity.HasIndex(p => p.GameId);
             });
