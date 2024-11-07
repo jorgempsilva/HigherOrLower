@@ -65,7 +65,6 @@ namespace HigherOrLower.Controllers
             return Ok(games);
         }
 
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet("{gameId}/score")]
         public async Task<IActionResult> GetScore(Guid gameId)

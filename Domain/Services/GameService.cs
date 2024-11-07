@@ -16,18 +16,21 @@ namespace Domain.Services
         public async Task<Game> GetGameById(Guid gameId)
         {
             var game = await _gameRepository.GetGameById(gameId);
-            game.Deck = game?.LoadDeckFromJson();
+
+            if (game != null)
+                game.Deck = game.LoadDeckFromJson();
+
             return game;
         }
 
         public async Task<GameDto> ProcessGuess(Guid gameId, bool guess)
         {
-            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found");
+            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found"); //TODO Create an CustomException
             game.Deck = game.LoadDeckFromJson();
             game.CurrentCard = game.Deck[0];
 
             if (game.Deck.Count < 2)
-                throw new Exception("No more cards in the deck to continue.");
+                throw new Exception("No more cards in the deck to continue."); //TODO Create an CustomException
 
             var nextCard = game.Deck[1];
 
@@ -42,9 +45,9 @@ namespace Domain.Services
 
         public async Task<List<Player>> GetFinalScore(Guid gameId)
         {
-            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
+            var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found."); //TODO Create an CustomException
             game.Deck = game.LoadDeckFromJson();
-            if (!game.IsGameOver) throw new Exception("Game is not yet over.");
+            if (!game.IsGameOver) throw new Exception("Game is not yet over."); //TODO Create an CustomException
 
             return game.Players;
         }
