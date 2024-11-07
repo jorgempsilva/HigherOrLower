@@ -15,7 +15,7 @@ namespace Infrastructure.Contexts
         {
 
             optionsBuilder
-                .UseSqlServer("Server=localhost,1433;Database=HigherOrLowerDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True")
+                .UseSqlServer("Server=db;Database=HigherOrLowerDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True")
                 .EnableSensitiveDataLogging();
 
             base.OnConfiguring(optionsBuilder);
