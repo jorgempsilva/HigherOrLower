@@ -15,12 +15,16 @@ namespace Domain.Services
 
         public async Task<Game> GetGameById(Guid gameId)
         {
-            return await _gameRepository.GetGameById(gameId);
+            var game = await _gameRepository.GetGameById(gameId);
+            game.Deck = game?.LoadDeckFromJson();
+            return game;
         }
 
         public async Task<GameDto> ProcessGuess(Guid gameId, bool guess)
         {
             var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found");
+            game.Deck = game.LoadDeckFromJson();
+            game.CurrentCard = game.Deck[0];
 
             if (game.Deck.Count < 2)
                 throw new Exception("No more cards in the deck to continue.");
@@ -39,7 +43,7 @@ namespace Domain.Services
         public async Task<List<Player>> GetFinalScore(Guid gameId)
         {
             var game = await _gameRepository.GetGameById(gameId) ?? throw new Exception("Game not found.");
-            
+            game.Deck = game.LoadDeckFromJson();
             if (!game.IsGameOver) throw new Exception("Game is not yet over.");
 
             return game.Players;

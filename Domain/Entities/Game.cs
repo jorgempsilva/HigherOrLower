@@ -1,5 +1,5 @@
 ﻿using Domain.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace Domain.Entities
 {
@@ -7,30 +7,40 @@ namespace Domain.Entities
     {
         public Guid Id { get; private set; }
         public int CurrentPlayerIndex { get; set; }
-        [NotMapped]
         public List<Card> Deck { get; set; } = [];
-        [NotMapped]
+        public string DeckJson { get; set; }
         public Card CurrentCard { get; set; }
         public List<Player> Players { get; set; } = [];
         public bool IsGameOver => CurrentPlayerIndex >= Deck.Count - 1;
 
         public Game()
         {
-            if (Deck.Count == 0)
-            {
-                Deck = GenerateShuffledDeck();
-                CurrentCard = Deck[0];
-            }
             CurrentPlayerIndex = 0;
             Id = Guid.NewGuid();
         }
 
-        public Player GetCurrentPlayer() => Players[CurrentPlayerIndex];
-
-        public void NextPlayer()
+        public void InitializeDeck()
         {
-            CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
+            if (DeckJson == null)
+            {
+                Deck = GenerateShuffledDeck();
+                CurrentCard = Deck[0];
+                DeckJson = SerializeDeck(Deck);
+            }
         }
+
+        public void UpdateDeck(List<Card> deck)
+        {
+            CurrentCard = deck[0];
+            DeckJson = SerializeDeck(deck);
+        }
+
+        private static string SerializeDeck(List<Card> deck) => JsonSerializer.Serialize(deck);
+
+        private List<Card> DeserializeDeck(string deckJson) =>
+            JsonSerializer.Deserialize<List<Card>>(deckJson) ?? [];
+
+        public List<Card> LoadDeckFromJson() => Deck = DeserializeDeck(DeckJson);
 
         private List<Card> GenerateShuffledDeck()
         {

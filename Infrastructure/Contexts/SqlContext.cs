@@ -11,9 +11,20 @@ namespace Infrastructure.Contexts
         public DbSet<Game> Games { get; set; }
         public DbSet<Player> Players { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+
+            optionsBuilder
+                .UseSqlServer("Server=localhost,1433;Database=HigherOrLowerDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True")
+                .EnableSensitiveDataLogging();
+
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>().Ignore(g => g.IsGameOver);
+            modelBuilder.Ignore<Card>();
             base.OnModelCreating(modelBuilder);
 
             PlayerMap.Map(modelBuilder);

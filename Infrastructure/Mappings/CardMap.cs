@@ -9,7 +9,7 @@ namespace Infrastructure.Mappings
         {
             return modelBuilder.Entity<Card>(entity =>
             {
-                entity.HasKey(c => new { c.Suit, c.Value });
+                entity.HasKey(c => c.Id);
 
                 entity.Property(c => c.Suit).IsRequired();
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    [Migration("20241106011728_ChangeGameAndPlayerAndRemoveCard")]
-    partial class ChangeGameAndPlayerAndRemoveCard
+    [Migration("20241106231438_AddFirstMigration")]
+    partial class AddFirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<int>("CurrentPlayerIndex")
                         .HasColumnType("int");
+
+                    b.Property<string>("DeckJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
