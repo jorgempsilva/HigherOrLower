@@ -20,6 +20,7 @@ namespace HigherOrLower.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetGame(Guid id)
@@ -29,8 +30,12 @@ namespace HigherOrLower.Controllers
             if (game == null)
                 return NotFound("Game not found.");
 
-            return Ok(new { GameId = id, Card = game.CurrentCard.Value.ToString() + game.CurrentCard.Suit.ToString(),
-                Players = game.Players.Select(x => x.Name ).ToList() });
+            return Ok(new
+            {
+                GameId = id,
+                Card = game.Deck[0].Value.ToString() + " of " + game.Deck[0].Suit.ToString(),
+                Players = game.Players.Select(x => x.Name).ToList()
+            });
         }
 
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,6 +56,12 @@ namespace HigherOrLower.Controllers
         public async Task<IActionResult> GetAllGames()
         {
             var games = await _gameService.GetAllGames();
+
+            foreach (var item in games)
+            {
+                item.Deck = item.LoadDeckFromJson();
+            }
+
             return Ok(games);
         }
 
@@ -59,21 +70,9 @@ namespace HigherOrLower.Controllers
         [HttpGet("{gameId}/score")]
         public async Task<IActionResult> GetScore(Guid gameId)
         {
-            try
-            {
-                var finalScore = await _gameService.GetFinalScore(gameId);
-                return Ok(new
-                {
-                    Player1 = finalScore.ElementAt(0).Name,
-                    FinalScore1 = finalScore.ElementAt(0).Score,
-                    Player2 = finalScore.ElementAt(1).Name,
-                    FinalScore2 = finalScore.ElementAt(1).Score,
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var finalScore = await _gameService.GetFinalScore(gameId);
+
+            return Ok(finalScore);
         }
     }
 }

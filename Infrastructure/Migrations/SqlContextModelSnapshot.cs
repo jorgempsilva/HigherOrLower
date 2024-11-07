@@ -31,6 +31,10 @@ namespace Infrastructure.Migrations
                     b.Property<int>("CurrentPlayerIndex")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeckJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Games");

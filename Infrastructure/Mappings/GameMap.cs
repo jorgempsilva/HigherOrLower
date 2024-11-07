@@ -13,6 +13,8 @@ namespace Infrastructure.Mappings
 
                 entity.Property(g => g.CurrentPlayerIndex).IsRequired();
 
+                entity.Property(g => g.DeckJson).IsRequired();
+
                 entity.HasMany(g => g.Players)
                     .WithOne(p => p.Game)
                     .HasForeignKey(x => x.GameId)

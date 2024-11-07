@@ -12,7 +12,8 @@ namespace Infrastructure.Repositories
 
         public async Task<Game> GetGameById(Guid gameId)
         {
-            return await _context.Games.Include(g => g.Players).FirstOrDefaultAsync(x => x.Id == gameId);
+            var game = await _context.Games.Include(g => g.Players).FirstOrDefaultAsync(x => x.Id == gameId);
+            return game;
         }
 
         public async Task<GameDto> AddGameAsync(List<string> playerNames)
@@ -28,6 +29,8 @@ namespace Infrastructure.Repositories
             {
                 foreach (var playerName in playerNames)
                     game.AddPlayer(playerName);
+
+                game.InitializeDeck();
 
                 _context.Games.Add(game);
 
@@ -66,7 +69,7 @@ namespace Infrastructure.Repositories
                 game.Players[game.CurrentPlayerIndex].Score += 1;
 
             game.Deck.RemoveAt(0);
-            game.CurrentCard = nextCard;
+            game.UpdateDeck(game.Deck);
 
             game.CurrentPlayerIndex = (game.CurrentPlayerIndex + 1) % game.Players.Count;
             game.Players.ForEach(p => p.IsTurn = false);
